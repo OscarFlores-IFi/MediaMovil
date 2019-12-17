@@ -21,7 +21,8 @@ k_clusters = Kclusters.k_clusters
 #%% Datos en csv
 csv = ['AMXL.MX','WALMEX.MX','TLEVISACPO.MX','GMEXICOB.MX','GFNORTEO.MX','CEMEXCPO.MX','PENOLES.MX','GFINBURO.MX','ELEKTRA.MX','BIMBOA.MX','AC.MX','KIMBERA.MX','LABB.MX','LIVEPOL1.MX','ASURB.MX','GAPB.MX','ALPEKA.MX','GRUMAB.MX','ALSEA.MX','GCARSOA1.MX','PINFRA.MX']
 for i in np.arange(len(csv)):
-    csv[i] = '../Test/%s.csv'%csv[i] #Se utilizan todos los datos para hacer las pruebas
+#    csv[i] = '../Test/%s.csv'%csv[i] #Se utilizan todos los datos para hacer las pruebas
+    csv[i] = '../Train/%s.csv'%csv[i]
 cetes = 'cetes_diarios.csv'
 ndias = [5,20,40,125]
 n_clusters = 4
@@ -82,7 +83,7 @@ gen = 5
 
 #%%
 #pickle.dump(Vals, open('Vals.sav','wb'))  
-pickle.load(open('Vals.sav','rb'))
+#pickle.load(open('Vals.sav','rb'))
 
 #%% ### Consenso de tomas de decisiones. ###
 SP = pd.value_counts(padres[:,0])
@@ -97,16 +98,30 @@ SPmax = SP.idxmax(axis=0)
 SPcnt = SP.max(axis=0)
 
 #%%
+SuperPadres = []
 SP_ = np.zeros(padres[0].shape)
-SP_[SPcnt>=32] = SPmax[SPcnt>=32]
+for i in range(len(padres)):
+    SP_ = np.zeros(padres[0].shape)
+    SP_[SPcnt>=len(padres)-i] = SPmax[SPcnt>=len(padres)-i]
+    SuperPadres.append(SP_)
+#%% n cantidad de resultados consensados
+#Vp_sp = []
+#for i in SuperPadres:
+#    Vp_sp.append(simulacion(csv,ndias,model_close,i,cetes))
 
-
-
-
-
-
-
-
+pickle.dump(Vp_sp, open('Vp_sp.sav','wb'))
+Vp_sp = pickle.load(open('Vp_sp.sav','rb'))
+#%% Tiempos conocidos, rendimientos del super-padre. 
+for i in Vp_sp:
+    print((i.T[-ult:]/i.T[-ult])[-1].mean())
+#%% Tiempos desconocidos, rendimientos de super-padre tomando n cantidad de resultados consensados
+for i in Vp_sp:
+    print((i.T[0:-ult]/i.T[0])[-ult].mean())
+#%% Simulaciòn del periodo desconocido si se compran los 21 activos y no se hace nada más. 
+#vp = Vp_sp[-1]
+vp = simulacion(csv,ndias,model_close,np.ones(SuperPadres[0].shape),cetes)    
+plt.plot(vp.T[-ult:-1]/vp.T[-ult])
+print((vp.T[-ult:-1]/vp.T[-ult])[-1].mean())
 
 
 
