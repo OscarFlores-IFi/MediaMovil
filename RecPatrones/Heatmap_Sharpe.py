@@ -28,30 +28,28 @@ n_clusters = 4
 nombre = 'model_close'
 model_close = pickle.load(open('model_close.sav','rb'))
 
-#%%
+#%% Cargamos los resultados generados por el algorítmo genético.
 nombre = 'Intento3_2'
 [punt,padres,hist_mean,hist_std,hist_cal,hist_padres] = pickle.load(open(nombre + '.sav','rb'))
 
-#%%
-""" Trabajaremos con los Padres históricos que se generaron cada 10 iteraciones (20 it. en total). """
-#%%
-hm_padres = np.zeros((hist_padres[0].shape[0]*len(hist_padres),hist_padres[0].shape[1])) # Creamos la matriz para construir el mapa de calor. 
-for i in np.arange(len(hist_padres)):
-    hm_padres[i*hist_padres[0].shape[0]:(i+1)*hist_padres[0].shape[0],:] = hist_padres[i]
+#%% Para generar un mapa de calor de las decisiones de todos los padres: 
+#hm_padres = np.zeros((hist_padres[0].shape[0]*len(hist_padres),hist_padres[0].shape[1])) # Creamos la matriz para construir el mapa de calor. 
+#for i in np.arange(len(hist_padres)):
+#    hm_padres[i*hist_padres[0].shape[0]:(i+1)*hist_padres[0].shape[0],:] = hist_padres[i]
 
 #%% Dibujamos el heatmap
-fig = plt.figure(figsize=(12,12))
-plt.imshow(hm_padres)
+#fig = plt.figure(figsize=(12,12))
+#plt.imshow(hm_padres)
 
 #%% Segundo heatmap, esta vez con el promedio de los padres. 
-hm_padres2 = np.zeros((len(hist_padres),hist_padres[0].shape[1])) # Creamos la matriz para construir el mapa de calor. 
-for i in np.arange(len(hist_padres)):
-    hm_padres2[i,:] = np.round(hist_padres[i].mean(axis=0))
-#    hm_padres2[i,:] = hist_padres[i].mean(axis=0)
+#hm_padres2 = np.zeros((len(hist_padres),hist_padres[0].shape[1])) # Creamos la matriz para construir el mapa de calor. 
+#for i in np.arange(len(hist_padres)):
+#    hm_padres2[i,:] = np.round(hist_padres[i].mean(axis=0)) # Redondeado
+#    hm_padres2[i,:] = hist_padres[i].mean(axis=0) # Sin redondear
     
 #%% Dibujamos el heatmap
-fig = plt.figure(figsize=(24,4))
-plt.imshow(hm_padres2)
+#fig = plt.figure(figsize=(24,4))
+#plt.imshow(hm_padres2)
 
 #%%############################################################################
 #################### Tiempos desconocidos. Mismos padres. #####################
@@ -86,20 +84,21 @@ gen = 5
 #pickle.dump(Vals, open('Vals.sav','wb'))  
 pickle.load(open('Vals.sav','rb'))
 
+#%% ### Consenso de tomas de decisiones. ###
+SP = pd.value_counts(padres[:,0])
+for i in range(len(padres[0])-1): 
+    SP = pd.concat([SP,pd.value_counts(padres[:,i+1])],axis=1)
+SP.columns = np.arange(len(padres[0]))
+SP[np.isnan(SP)] = 0
+#%%
+#SP.T.plot()
+#%% Para generar al super padre
+SPmax = SP.idxmax(axis=0)
+SPcnt = SP.max(axis=0)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+#%%
+SP_ = np.zeros(padres[0].shape)
+SP_[SPcnt>=32] = SPmax[SPcnt>=32]
 
 
 
