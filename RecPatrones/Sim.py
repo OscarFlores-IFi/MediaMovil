@@ -43,13 +43,13 @@ model_close = pickle.load(open('model_close.sav','rb'))
 
 #%% Se crea vector de toma de decisiones para futuro uso
 #Ud = np.random.randint(-1,2,len(model_close)**len(ndias))
-#Ud = np.zeros(len(model_close)**len(ndias))
+Ud = np.zeros(len(model_close)**len(ndias))
 #%%############################################################################
 ######################  Simulación para optimización ##########################
 ###############################################################################
 
 #%% Simulamos
-#Vp = simulacion(csv,ndias,model_close,Ud,cetes)
+Vp = simulacion(csv,ndias,model_close,Ud,cetes)
 #Vp = simulacion(csv,ndias,model_close,padres[-4],cetes)
 #Vp = simulacion(csv,ndias,model_close,np.ones(Ud.shape),cetes)
 
@@ -88,7 +88,7 @@ rf = 0.0471 # Tasa libre de riesgo (real, anual) promedio del periodo de entrena
 C0 = padres # La cantidad de vectores de condición inicial tienen que ser menor a la cantidad de vectores con la que se trabajará en el AG. 
 nombre = 'Intento3_2'
 #####genetico(func,C0,csv,cetes,ndias,model_close,l_vec,n_vec,iteraciones,C,rf,nombre):
-genetico(simulacion,C0,csv,cetes,ndias,model_close,l_vec,n_vec,iteraciones,C,rf,nombre)
+#genetico(simulacion,C0,csv,cetes,ndias,model_close,l_vec,n_vec,iteraciones,C,rf,nombre)
 
 #%%
 [punt,padres,hist_mean,hist_std,hist_cal,hist_padres] = pickle.load(open(nombre + '.sav','rb'))
@@ -100,6 +100,51 @@ plt.show()
 #%%
 fig = plt.figure()
 plt.plot(hist_std[-1],hist_mean[-1],'k.')
+plt.plot([0,hist_std[-1][-2]],[rf/252,hist_mean[-1][-2]])
 plt.show()
 
 
+#%%
+#%%
+#%%
+#%%############################################################################
+######################## GRAFICOS! para el artículo ###########################
+###############################################################################
+
+#%% Grafico para cuando se tiene posición larga en todos los activos. 
+Ud = np.zeros(len(model_close)**len(ndias))
+Vp = simulacion(csv,ndias,model_close,np.ones(Ud.shape),cetes)
+fig = plt.figure(figsize=(10,6))
+plt.plot(Vp.T)
+plt.title('Assets')
+plt.xlabel('business days since 2013-04-25')
+plt.ylabel('position value')
+fig.text(.5, -.0, '1424 business days with a long position, from 2013-04-25 to 2018-12-31', ha='center')
+plt.show()
+fig.savefig('Assets',bbox_inches='tight')
+
+#%% Grafica de precios de cetes
+cts = pd.read_csv('CETES28.csv',index_col='Fecha')
+cts = cts.drop(columns = 'Unnamed: 0')
+cts.plot().get_figure().savefig('Cetes.png',bbox_inches='tight')
+#%%
+# model_close[0].__dict__ # para recordar todos los atributos que tienen disponibles. 
+fig = plt.figure()
+
+plt.subplot(221)
+plt.plot(model_close[0].cluster_centers_.T)
+plt.title('5 days')
+plt.subplot(222)
+plt.plot(model_close[1].cluster_centers_.T)
+plt.title('20 days')
+plt.subplot(223)
+plt.plot(model_close[2].cluster_centers_.T)
+plt.title('40 days')
+plt.subplot(224)
+plt.plot(model_close[3].cluster_centers_.T)
+plt.title('125 days')
+
+fig.suptitle("Cluster Centers", fontsize=14)
+fig.tight_layout(pad=2.0)
+fig.savefig('Cluster_centers')
+plt.show()

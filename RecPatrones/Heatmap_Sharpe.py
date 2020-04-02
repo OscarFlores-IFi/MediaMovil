@@ -105,9 +105,9 @@ for i in range(len(padres)):
     SP_[SPcnt>=len(padres)-i] = SPmax[SPcnt>=len(padres)-i]
     SuperPadres.append(SP_)
 #%% n cantidad de resultados consensados
-#Vp_sp = []
-#for i in SuperPadres:
-#    Vp_sp.append(simulacion(csv,ndias,model_close,i,cetes))
+Vp_sp = []
+for i in SuperPadres:
+    Vp_sp.append(simulacion(csv,ndias,model_close,i,cetes))
 
 pickle.dump(Vp_sp, open('Vp_sp.sav','wb'))
 Vp_sp = pickle.load(open('Vp_sp.sav','rb'))
